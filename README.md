@@ -2,7 +2,9 @@
 
 
 Urban Analysis using Computer Vision
+
 Srinath Srinivasan, Nikhil Yarram, Roshan Verma
+
 CS 639, Fall 2021
 
 Crowd counting is a technique used to estimate the number of people in a particular scene. (image or video) This technique plays a crucial role in urban planning, public safety, intelligent transportation and even helps optimize services in the commercial sector. Furthemore, crowd counting can be used to estimate the population density of an area in real-time. The population density can be used in a plethora of urban analysis such as monitoring usage of streets, malls, parks, etc. Such data could be especially useful in analyzing the spread of COVID-19, enforcing regulations such as social distancing, and allotting necessary resources to areas that require it the most.  In this research project, we will use computer vision to train a machine learning model with video footage from the VisDrone dataset. Our goal is to be able to perform object identification, crowd counting and segmentation on a given scene environment.  
