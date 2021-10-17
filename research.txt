@@ -1,1 +1,5 @@
+Tackling occlusion in object detection - https://www.itransition.com/blog/video-object-recognition-detection
+
+Different algorithms for object detection - https://www.fritz.ai/object-detection/
+
 
