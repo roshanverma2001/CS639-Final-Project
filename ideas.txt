@@ -1,0 +1,1 @@
+Object Detection resource - https://www.fritz.ai/object-detection/
