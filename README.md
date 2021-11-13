@@ -54,3 +54,7 @@ Segmentation and design functionality tests
 12/7/21
 Final Project Done, including web page
 
+## Helpful Links for Multi Object Tracking 
+
+https://mmtracking.readthedocs.io/en/latest/
+https://githubmemory.com/repo/luanshiyinyang/awesome-multiple-object-tracking
