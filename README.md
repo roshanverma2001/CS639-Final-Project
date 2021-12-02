@@ -56,5 +56,12 @@ Final Project Done, including web page
 
 ## Helpful Links for Multi Object Tracking 
 
-https://mmtracking.readthedocs.io/en/latest/
-https://githubmemory.com/repo/luanshiyinyang/awesome-multiple-object-tracking
+- https://mmtracking.readthedocs.io/en/latest/
+- https://githubmemory.com/repo/luanshiyinyang/awesome-multiple-object-tracking
+- https://opencv.org/multiple-object-tracking-in-realtime/
+- literature review
+    - https://reader.elsevier.com/reader/sd/pii/S0004370220301958?token=4D2B9D7911D80D0D414F8BC133089E826292DE125C48DABE4F7F0CAD0B9B691D9A072BA2C0E05E3DB52A7370E6779B45&originRegion=us-east-1&originCreation=20211114231546
+
+## Format of data for multi object tracking
+
+- <frame_index>,<target_id>,<bbox_left>,<bbox_top>,<bbox_width>,<bbox_height>,<score>,<object_category>,  < truncation>,                < occlusion>

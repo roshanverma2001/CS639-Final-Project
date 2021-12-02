@@ -198,3 +198,7 @@ dmypy.json
 
 # .zip
 *.zip
+
+# videos
+*.avi
+*.mp4
