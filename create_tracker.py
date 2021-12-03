@@ -2,10 +2,14 @@ import sys
 import cv2
 from random import randint
 
+## https://www.pyimagesearch.com/2018/08/06/tracking-multiple-objects-with-opencv/
+
+## https://learnopencv.com/multitracker-multiple-object-tracking-using-opencv-c-python/
+
 (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
 
 
-def returnTracker(requested_tracker):
+def returnTrackerName(requested_tracker):
     if int(major_ver) < 4 and int(minor_ver) < 3:
         print("major < 4")
         tracker = cv2.cv2.Tracker_create(requested_tracker)
@@ -20,6 +24,7 @@ def returnTracker(requested_tracker):
             #   'GOTURN': cv2.Tracker_GOTURN_create(),
             'MOSSE':  cv2.TrackerCSRT_create(),
             'CSRT': cv2.legacy_TrackerMOSSE.create()
+            
         }
         return opencv_trackers[requested_tracker.upper()]
 

@@ -64,4 +64,10 @@ Final Project Done, including web page
 
 ## Format of data for multi object tracking
 
+http://aiskyeye.com/evaluate/results-format/
+
 - <frame_index>,<target_id>,<bbox_left>,<bbox_top>,<bbox_width>,<bbox_height>,<score>,<object_category>,  < truncation>,                < occlusion>
+
+
+https://www.r-bloggers.com/2021/09/object-detection-and-tracking-in-python/
+
