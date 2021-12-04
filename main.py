@@ -5,7 +5,7 @@ import cv2
 
 def main():
     #  convert_video()
-    tracker = create_tracker.returnTrackerName("Boosting")
+    tracker = create_tracker.returnTrackerName("CSRT")
     multi_tracker = cv2.legacy.MultiTracker_create()
 
     locate_objects.define_bounding_boxes(

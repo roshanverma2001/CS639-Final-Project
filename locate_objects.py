@@ -1,6 +1,7 @@
 import cv2
 from random import randint
 from test_initial_boxes import test_initial_boxes
+import create_tracker
 
 
 def define_bounding_boxes(video_path, annotations_path, tracker, multiTracker):
@@ -29,13 +30,16 @@ def define_bounding_boxes(video_path, annotations_path, tracker, multiTracker):
 
     # Initialize tracker
     for box in boxes:
-        print(box)
+        # print(box)
         # cv2.rectangle(frame,
         #               (box[0], box[1]),
         #               (box[0] + box[2], box[1] + box[3]),
         #               colors[randint(0, len(colors) - 1)])
-        multiTracker.add(tracker, frame, box)
-
+        multiTracker.add(create_tracker.returnTrackerName("CSRT"), frame, box)
+    # cv2.imshow('image', frame)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    #
     # Process video and track objects
     while captured_video.isOpened():
         success, frame = captured_video.read()
@@ -44,19 +48,20 @@ def define_bounding_boxes(video_path, annotations_path, tracker, multiTracker):
 
         # get updated location of objects in subsequent frames
         success, boxes = multiTracker.update(frame)
-        print("new: ", boxes)
 
         # draw tracked objects
         for i, newbox in enumerate(boxes):
             p1 = (int(newbox[0]), int(newbox[1]))
             p2 = (int(newbox[0] + newbox[2]), int(newbox[1] + newbox[3]))
-            cv2.rectangle(frame, p1, p2, colors[i], 2, 1)
+            cv2.rectangle(frame, p1, p2,  colors[i])
 
         # show frame
         cv2.imshow('MultiTracker', frame)
 
         # quit on ESC button
-        if cv2.waitKey(1) & 0xFF == 27:  # Esc pressed
+       # key = cv2.waitKey(3000)  # pauses for 3 seconds before fetching next image
+
+        if cv2.waitKey(500) & 0xFF == 27:  # Esc pressed
             break
             # return located_objects.values(), frame
 

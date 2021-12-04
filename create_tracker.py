@@ -2,6 +2,7 @@ import sys
 import cv2
 from random import randint
 
+
 ## https://www.pyimagesearch.com/2018/08/06/tracking-multiple-objects-with-opencv/
 
 ## https://learnopencv.com/multitracker-multiple-object-tracking-using-opencv-c-python/
@@ -16,15 +17,15 @@ def returnTrackerName(requested_tracker):
 
     try:
         opencv_trackers = {
-            'BOOSTING':  cv2.legacy_TrackerBoosting.create(),
+            'BOOSTING': cv2.legacy_TrackerBoosting.create(),
             'MIL': cv2.TrackerMIL_create(),
             'KCF': cv2.TrackerKCF_create(),
             #   'TLD': cv2.TrackerTLD_create(),
             'MEDIANFLOW': cv2.legacy_TrackerMedianFlow.create(),
             #   'GOTURN': cv2.Tracker_GOTURN_create(),
-            'MOSSE':  cv2.TrackerCSRT_create(),
+            'MOSSE': cv2.TrackerCSRT_create(),
             'CSRT': cv2.legacy_TrackerMOSSE.create()
-            
+
         }
         return opencv_trackers[requested_tracker.upper()]
 
