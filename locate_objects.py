@@ -35,7 +35,7 @@ def define_bounding_boxes(video_path, annotations_path, tracker, multiTracker):
         #               (box[0], box[1]),
         #               (box[0] + box[2], box[1] + box[3]),
         #               colors[randint(0, len(colors) - 1)])
-        multiTracker.add(create_tracker.returnTrackerName("CSRT"), frame, box)
+        multiTracker.add(create_tracker.returnTrackerName("Boosting"), frame, box)
     # cv2.imshow('image', frame)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
