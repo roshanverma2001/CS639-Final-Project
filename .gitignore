@@ -198,3 +198,47 @@ dmypy.json
 
 # .zip
 *.zip
+
+## videos
+*.wmv
+*.mpg
+*.mpeg
+*.mp4
+*.mov
+*.flv
+*.avi
+*.ogv
+*.ogg
+*.webm
+
+
+
+## Yolo stuff:
+
+*.o
+*.dSYM
+*.csv
+*.out
+*.png
+*.jpg
+*.pyc
+old/
+mnist/
+data/
+caffe/
+grasp/
+images/
+opencv/
+convnet/
+decaf/
+submission/
+cfg/
+darknet
+.fuse*
+
+# OS Generated #
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+*.swp
