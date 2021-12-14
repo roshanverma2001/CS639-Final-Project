@@ -1,15 +1,9 @@
-import imutils as imutils
-import numpy as np
-import argparse
-import time
-import cv2
 import os
+import cv2
+import numpy as np
+import imutils as imutils
 import math
-import test_accuracy
-## steps to downoading YOLO: https://cloudxlab.com/blog/setup-yolo-with-darknet/
-## https://www.pyimagesearch.com/2018/11/12/yolo-object-detection-with-opencv/
-
-def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5):
+def test_accuracy_of_video(input, output, yolo, confidence = 0.5, threshold = 0.5):
 
     arguments = {}
     arguments["input"] = input
@@ -19,16 +13,22 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
     arguments["threshold"] = threshold
 
     video_name = arguments["input"].split(".")[0].split("/")
-    print("video name: ", video_name)
+   # print("video name: ", video_name)
+
+    curr_type = video_name[0].split("_")[1]
+
+    extension = ".txt"    
+    accuracy_write_path = os.path.join("accuracy", curr_type, video_name[1])  + extension
+
+   # print(f"accuracy_write_path: {accuracy_write_path}")
+
+    accuracy_write_file = open(accuracy_write_path, "w")
+
+
     # YOLO model is trained on CoCo dataset.
     path_to_labels = os.path.sep.join([arguments["yolo"], "data", "coco.names"])
     labels = open(path_to_labels).read().strip().split("\n")
 
-    colors = np.random.randint(0, 255, size=(len(labels), 3),
-                            dtype="uint8")
-
-    # print(colors)
-    # print(len(colors))
 
     # load yolo
     path_to_yolo_weights = os.path.sep.join([arguments["yolo"], "yolov3.weights"])
@@ -47,7 +47,6 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
     # preprocess using opencv
 
     video_stream = cv2.VideoCapture(arguments["input"])
-    video_writer = None
 
     (height, width) = (None, None)
 
@@ -80,7 +79,6 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416),
                                     swapRB=True, crop=False)
         yolo_nn.setInput(blob)
-        start_time = time.time()
         output_layers = yolo_nn.forward(output_layer)
 
         bounding_boxes = []
@@ -117,47 +115,79 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
 
         # print("boudning boxes: ", bounding_boxes)
         # print(f"len(nms_indices): {len(nms_indices)}")
-        #test_accuracy.accuracy(count, bounding_boxes=bounding_boxes, nms_indices=nms_indices, video_name=video_name)
-        if len(nms_indices) > 0:
+        accuracy_measurements = accuracy(count, bounding_boxes=bounding_boxes, nms_indices=nms_indices, 
+        video_name=video_name)
 
-            for idx in nms_indices.flatten():
-                (box_x, box_y, box_width, box_height) = (bounding_boxes[idx][0], bounding_boxes[idx][1],
-                                                        bounding_boxes[idx][2], bounding_boxes[idx][3])
+        # (number_detected, average_percent_diff, average_less_than_15) = accuracy(count, bounding_boxes=bounding_boxes, nms_indices=nms_indices, 
+        # video_name=video_name)
+        accuracy_measurements = list(accuracy_measurements)
+        accuracy_measurements = ",".join(accuracy_measurements)
+        accuracy_measurements += "\n"
+        accuracy_write_file.write(accuracy_measurements)
+        count += 1
 
-                # draw box
-                # print(f" {type(classifications)} || classifications: {classifications[1]}")
-                # print(f"colors: {colors}")
-                # print(f"idx: {idx}")
-                curr_color = tuple([int(c) for c in colors[class_id]])
-                curr_color = (int(curr_color[0]), int(curr_color[1]), int(curr_color[2]))
+def accuracy(frame, bounding_boxes, nms_indices,  video_name):
+    all_boxes = [(bounding_boxes[idx][0] + 1, bounding_boxes[idx][1] + 1,
+                                                        bounding_boxes[idx][2] + 1, bounding_boxes[idx][3] + 1) for idx in nms_indices.flatten()]
 
-              #  print(curr_color)
-                cv2.rectangle(frame,
-                            (box_x, box_y),
-                            (box_x + box_width, box_y + box_height),
-                            curr_color,
-                            2)
+    # print(len(all_boxes))
+    # print("video_name: ", video_name)
 
-                # print(f"idx: {idx} || classificaitons: {classifications} || labels: {labels}")
-                text = f"{labels[classifications[idx]]}: {confidence_boxes[idx]}"
+    annotations_file_name = ""
+    extension = ".txt"    
+    if video_name[0].split("_")[1] == "train":
+        annotations_file_name = os.path.join("VisDrone2019-MOT-train", "annotations", video_name[1])  + extension
+    else:
+        annotations_file_name = os.path.join("VisDrone2019-MOT-test-dev", "VisDrone2019-MOT-test-dev", "annotations", video_name[1]) + extension
 
-                cv2.putText(img=frame, text=text, org=(box_x, box_y - 5),
-                            fontFace=cv2.FONT_HERSHEY_PLAIN,
-                            fontScale=1,
-                            color=curr_color, thickness=2)
+    # print(annotations_file_name)
+    all_annotations = []
+    frame +=1
+    with open(annotations_file_name) as file:
+        for line in file:
+           # print(line)
+           # stripped = [int(i) for i in line.rstrip()]
+            stripped = line.strip()
+            # Offset by 1 to avoid 0 errors
+            stripped = [int(i) + 1 for i in stripped.split(",")]
+           # stripped = [int(i) for i in line.split(line.strip(),)
+            #print(stripped)
+            if stripped[0] == frame:
+                all_annotations.append(stripped[2:6])
 
+    if len(all_annotations) == 0:
+        return ("0","0","0")
 
+    # print(all_boxes)
+    # print("!" * 20)
+    # print(all_annotations)
+    # print(len(all_annotations))
 
-            # check if the video writer is None
-            if video_writer is None:
-                # initialize our video writer
-                fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-                video_writer = cv2.VideoWriter(arguments["output"], fourcc, math.floor(total / 20),
-                    (frame.shape[1], frame.shape[0]), True)
-            count +=1
-        # write the output frame to disk
-        video_writer.write(frame)
-    # release the file pointers
-    print("\t[INFO] cleaning up...")
-    video_writer.release()
-    video_stream.release()
+    all_boxes = sorted(all_boxes, key = lambda x: x[0])
+    all_annotations = sorted(all_annotations, key = lambda x: x[0])
+    accuracy_less_than_15 = [None for i in range(min(len(all_boxes), len(all_annotations)))]
+    accuracy_percentages = [None for i in range(min(len(all_boxes), len(all_annotations)))]
+
+    for i in range(min(len(all_boxes), len(all_annotations))):
+        # print(all_boxes[i])
+        # print(all_annotations[i])
+        bb_area = all_boxes[i][2] * all_boxes[i][3]
+        annotated_area = all_annotations[i][2] * all_annotations[i][3]
+        # print("bb area: ", bb_area)
+        # print("annotated area: ", annotated_area)
+        # print("-" * 20)
+        area_diff_float = abs(annotated_area - bb_area) / annotated_area
+        accuracy_percentages[i] = (area_diff_float)
+
+        if area_diff_float <= .15:
+            accuracy_less_than_15[i] = 1
+        else:
+            accuracy_less_than_15[i] = 0
+
+    # total number objects detected, average difference, # annotations with differences < 15
+    return (str(len(all_boxes) / len(all_annotations)), 
+            str(sum(accuracy_percentages)/len(accuracy_percentages)),
+            str(sum(accuracy_less_than_15) / len(accuracy_less_than_15)))
+
+    
+
