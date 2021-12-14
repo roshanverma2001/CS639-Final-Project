@@ -10,25 +10,21 @@ def figure_out_accuracy_all_videos(source_directory, destination_directory, yolo
     num_vids = len(sorted(os.listdir(source_directory)))
 
     for idx, filename in enumerate(sorted(os.listdir(source_directory))):
-        if idx > 0:
-            break
+        if idx < 8:
+            continue
         input_video_name = os.path.join(source_directory, filename)
         output_video_name = os.path.join(destination_directory, filename)
 
   
         
-         
-        # if os.path.exists(output_video_name):
-        #     print(output_video_name, "exists")
-        #     continue
-
+       
         # target_video_name = os.path.join(target_directory, filename)
         # target_video_name = target_video_name + extension
 
         # print(input_video_name)
         # print(output_video_name)
         # print("-" * 15)
-        print(f"!! Testing accuracy for {input_video_name}... Video {idx} of {num_vids}!!")
+        print(f"!! Testing accuracy for {input_video_name}... Video {idx + 1} of {num_vids}!!")
 
         test_accuracy_of_video(input=input_video_name,
                                              output=output_video_name, 

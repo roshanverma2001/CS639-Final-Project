@@ -30,6 +30,12 @@ def test_accuracy_of_video(input, output, yolo, confidence=0.5, threshold=0.5):
 
     accuracy_write_file = open(accuracy_write_path, "w")
 
+    
+    # if os.path.exists(accuracy_write_path):
+    #     print(accuracy_write_path, "exists")
+    #     return None
+
+
     # YOLO model is trained on CoCo dataset.
     path_to_labels = os.path.sep.join(
         [arguments["yolo"], "data", "coco.names"])
@@ -169,7 +175,7 @@ def accuracy(frame, bounding_boxes, nms_indices,  video_name):
             if stripped[0] == frame:
                 all_annotations.append(stripped[2:6])
 
-    if len(all_annotations) == 0:
+    if len(all_annotations) == 0 or len(all_boxes) == 0:
         return ("0", "0", "0")
 
     # print(all_boxes)
@@ -179,6 +185,9 @@ def accuracy(frame, bounding_boxes, nms_indices,  video_name):
 
     all_boxes = sorted(all_boxes, key=lambda x: (x[0], x[1]))
     all_annotations = sorted(all_annotations, key=lambda x: x[0])
+
+    if all_annotations == []:
+        return ("0","0","0")
     accuracy_less_than_15 = [None for i in range(
         min(len(all_boxes), len(all_annotations)))]
     accuracy_percentages = [None for i in range(
@@ -187,6 +196,7 @@ def accuracy(frame, bounding_boxes, nms_indices,  video_name):
     intersections = []
     visited_annotations = []
     percent_area = []
+    
     for i in all_boxes:
         best_box = (None, None)
 
@@ -197,7 +207,7 @@ def accuracy(frame, bounding_boxes, nms_indices,  video_name):
         #               (i[0] + i[2], i[1] - i[3])
         #               ])
         # top left, top right, bottom left, bottom right
-        expansion = 150
+        expansion = 75
         i = [x + expansion for x in i]
         bb = Polygon([(i[0], i[1])  ,
                       (i[0] + i[2], i[1]),
@@ -233,12 +243,19 @@ def accuracy(frame, bounding_boxes, nms_indices,  video_name):
             if None in best_box or intersection > best_box[0]:
                 best_box = (intersection, j)
             
-        intersections.append(best_box[0])
+        if None not in best_box:
+            percent_area.append(best_box[0] / bb.area)
+
+            intersections.append(best_box[0])
         visited_annotations.append(best_box[1])
         #print(intersection / bb.area)
-        percent_area.append(best_box[0] / bb.area)
 
-    avg_intersection = sum(intersections) / len(intersections)
+    
+    if len(intersections) == 0:
+        avg_intersection = 0
+    else:
+        avg_intersection = sum(intersections) / len(intersections)
+        
     avg_area_covered = sum(percent_area) / len(percent_area)
 
     # print(f"frame: {frame}")
