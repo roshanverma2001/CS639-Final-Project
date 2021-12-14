@@ -10,7 +10,8 @@ def figure_out_accuracy_all_videos(source_directory, destination_directory, yolo
     num_vids = len(sorted(os.listdir(source_directory)))
 
     for idx, filename in enumerate(sorted(os.listdir(source_directory))):
- 
+        if idx > 0:
+            break
         input_video_name = os.path.join(source_directory, filename)
         output_video_name = os.path.join(destination_directory, filename)
 
