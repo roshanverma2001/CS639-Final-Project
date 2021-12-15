@@ -11,7 +11,7 @@ def compute_accuracy_metrics_single_file(file):
                      names=['percentage_frames', 'avg_area_intersection',
                             'avg_percentage_intersection'],  # set columns names
                      )
-
+    df = df.iloc[1: , :]    
    # print(df)
 
     file_header = file.split(".")[0]
