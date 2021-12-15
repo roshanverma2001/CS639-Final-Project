@@ -8,8 +8,11 @@ def main():
 
   #  compute_metrics_all_files("test")
 
-    label_all_images(source_directory="VisDrone2019-MOT-test-dev/VisDrone2019-MOT-test-dev/sequences",
-    destination_directory= "images_test_labeled")
+    # label_all_images(source_directory="VisDrone2019-MOT-test-dev/VisDrone2019-MOT-test-dev/sequences",
+    # destination_directory= "images_test_labeled")
+    
+    
+    figure_out_accuracy_all_images(source_directory = "images_test_labeled", destination_directory = "accuracy_images", confidence = 0.5)
 
 if __name__ == "__main__":
     main()

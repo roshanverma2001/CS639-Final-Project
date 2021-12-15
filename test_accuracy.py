@@ -143,6 +143,116 @@ def test_accuracy_of_video(input, output, yolo, confidence=0.5, threshold=0.5):
         accuracy_write_file.write(accuracy_measurements)
         count += 1
 
+def test_accuracy_of_image(input, output, yolo, confidence=0.5, threshold=0.5):
+    arguments = {}
+    arguments["input"] = input
+    arguments["output"] = output
+    arguments["yolo"] = yolo
+    arguments["confidence"] = confidence
+    arguments["threshold"] = threshold
+
+    video_name = arguments["input"].split(".")[0].split("/")
+   # print("video name: ", video_name)
+    image = arguments["input"]
+    curr_type = video_name[0].split("_")[1]
+
+    extension = ".txt"
+    accuracy_write_path = os.path.join(
+        "accuracy_images", curr_type, video_name[1]) + extension
+
+   # print(f"accuracy_write_path: {accuracy_write_path}")
+
+    accuracy_write_file = open(accuracy_write_path, "w")
+
+    
+    # if os.path.exists(accuracy_write_path):
+    #     print(accuracy_write_path, "exists")
+    #     return None
+
+
+    # YOLO model is trained on CoCo dataset.
+    path_to_labels = os.path.sep.join(
+        [arguments["yolo"], "data", "coco.names"])
+    labels = open(path_to_labels).read().strip().split("\n")
+
+    # load yolo
+    path_to_yolo_weights = os.path.sep.join(
+        [arguments["yolo"], "yolov3.weights"])
+    path_to_yolo_config = os.path.sep.join(
+        [arguments["yolo"], "cfg", "yolov3.cfg"])
+
+    print("\tLoading YOLO!: ...")
+    # cv2.dnn == OpenCV's deep neural network class
+    yolo_nn = cv2.dnn.readNetFromDarknet(
+        path_to_yolo_config, path_to_yolo_weights)
+
+    # get the output layer
+
+    output_layer = yolo_nn.getLayerNames()
+
+    output_layer = [output_layer[i - 1]
+                    for i in yolo_nn.getUnconnectedOutLayers()]
+
+    # preprocess using opencv
+
+    (height, width) = (None, None)
+
+ 
+    # preprocess using opencv
+
+    blob = cv2.dnn.blobFromImage(
+        image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
+
+    yolo_nn.setInput(blob)
+
+
+    output_layers = yolo_nn.forward(output_layer)
+
+   # print(f"YOLO took {end - start_time} seconds")
+
+    bounding_boxes = []
+    confidence_boxes = []
+    classifications = []
+
+    for layer in output_layers:
+      #  print(f"layer: {layer} has {len(layer)} detections")
+        for detection in layer:
+
+            # extract the class ID and confidence (i.e., probability) of
+            # the current object detection
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+
+            if confidence >= arguments["confidence"]:
+                curr_box = detection[0:4] * \
+                        np.array([width, height, width, height])
+                (x_center, y_center, box_width, box_height) = curr_box.astype("int")
+
+                curr_x = int(x_center - box_width / 2)
+                curr_y = int(y_center - box_height / 2)
+
+                bounding_boxes.append(
+                    [curr_x, curr_y, int(box_width), int(box_height)])
+                confidence_boxes.append(float(confidence))
+                classifications.append(class_id)
+
+    # perform non maxima suppresion?
+    nms_indices = cv2.dnn.NMSBoxes(
+        bounding_boxes, confidence_boxes, arguments["confidence"], arguments["threshold"])
+
+    # print("boudning boxes: ", bounding_boxes)
+    # print(f"len(nms_indices): {len(nms_indices)}")
+    accuracy_measurements = accuracy(0, bounding_boxes=bounding_boxes, nms_indices=nms_indices,
+                                        video_name=video_name)
+
+    # (number_detected, average_percent_diff, average_less_than_15) = accuracy(count, bounding_boxes=bounding_boxes, nms_indices=nms_indices,
+    # video_name=video_name)
+    accuracy_measurements = list(accuracy_measurements)
+    accuracy_measurements = ",".join(accuracy_measurements)
+    accuracy_measurements += "\n"
+    accuracy_write_file.write(accuracy_measurements)
+
 
 def accuracy(frame, bounding_boxes, nms_indices,  video_name):
     all_boxes = [(bounding_boxes[idx][0] + 1, bounding_boxes[idx][1] + 1,
@@ -200,12 +310,6 @@ def accuracy(frame, bounding_boxes, nms_indices,  video_name):
     for i in all_boxes:
         best_box = (None, None)
 
-       # print(i)
-        # print([(i[0], i[1]),
-        #               (i[0] + i[2], i[1]),
-        #               (i[0], i[1] - i[3]),
-        #               (i[0] + i[2], i[1] - i[3])
-        #               ])
         # top left, top right, bottom left, bottom right
         expansion = 75
         i = [x + expansion for x in i]
