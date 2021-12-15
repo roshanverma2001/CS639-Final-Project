@@ -16,6 +16,8 @@ def convert_video(source_directory = "VisDrone2019-MOT-train/sequences/", target
         target_video_name = os.path.join(target_directory, filename)
         target_video_name = target_video_name + extension
 
+        print("image folder: ", image_folder)
+        print("target video name: ", target_video_name)
         
         if os.path.exists(target_video_name):
             print(target_video_name, "exists")
@@ -28,7 +30,7 @@ def convert_video(source_directory = "VisDrone2019-MOT-train/sequences/", target
         frame = cv2.imread(os.path.join(image_folder, images[0]))
         height, width, layers = frame.shape
 
-        video = cv2.VideoWriter(target_video_name, fourcc, 1, (width,height))
+        video = cv2.VideoWriter(target_video_name, fourcc, len(images) / 20, (width,height))
 
         for image in images:
             video.write(cv2.imread(os.path.join(image_folder, image)))
