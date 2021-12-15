@@ -60,27 +60,24 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
     # an error occurred while trying to determine the total
     # number of frames in the video file
     except:
-        print("\t[INFO] could not determine # of frames in video")
-        print("\t[INFO] no approx. completion time can be provided")
+        print("\tcould not determine # of frames in video")
         total = -1
 
     count = 0
     while True:
         if count % 50 == 0: print(f"\ton frame {count} of {total}")
         # read the next frame from the file
-        (grabbed, frame) = video_stream.read()
-        # if the frame was not grabbed, then we have reached the end
-        # of the stream
-        if not grabbed:
+        (success, frame) = video_stream.read()
+   
+        if not success:
             break
-        # if the frame dimensions are empty, grab them
+
         if width is None or height is None:
             (height, width) = frame.shape[:2]
 
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416),
                                     swapRB=True, crop=False)
         yolo_nn.setInput(blob)
-        start_time = time.time()
         output_layers = yolo_nn.forward(output_layer)
 
         bounding_boxes = []
@@ -88,14 +85,11 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
         classifications = []
 
         for layer in output_layers:
-        #  print(f"layer: {layer} has {len(layer)} detections")
             for detection in layer:
 
-                # extract the class ID and confidence (i.e., probability) of
-                # the current object detection
+ 
                 scores = detection[5:]
                 class_id = np.argmax(scores)
-                #print(class_id)
                 confidence = scores[class_id]
 
                 if confidence >= arguments["confidence"]:
@@ -112,33 +106,26 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
                     classifications.append(class_id)
 
         # perform non maxima suppresion?
+        # helps with overlapping boxes
         nms_indices = cv2.dnn.NMSBoxes(
             bounding_boxes, confidence_boxes, arguments["confidence"], arguments["threshold"])
 
-        # print("boudning boxes: ", bounding_boxes)
-        # print(f"len(nms_indices): {len(nms_indices)}")
-        #test_accuracy.accuracy(count, bounding_boxes=bounding_boxes, nms_indices=nms_indices, video_name=video_name)
+       
         if len(nms_indices) > 0:
 
             for idx in nms_indices.flatten():
                 (box_x, box_y, box_width, box_height) = (bounding_boxes[idx][0], bounding_boxes[idx][1],
                                                         bounding_boxes[idx][2], bounding_boxes[idx][3])
 
-                # draw box
-                # print(f" {type(classifications)} || classifications: {classifications[1]}")
-                # print(f"colors: {colors}")
-                # print(f"idx: {idx}")
                 curr_color = tuple([int(c) for c in colors[class_id]])
                 curr_color = (int(curr_color[0]), int(curr_color[1]), int(curr_color[2]))
 
-              #  print(curr_color)
                 cv2.rectangle(frame,
                             (box_x, box_y),
                             (box_x + box_width, box_y + box_height),
                             curr_color,
                             2)
 
-                # print(f"idx: {idx} || classificaitons: {classifications} || labels: {labels}")
                 text = f"{labels[classifications[idx]]}: {confidence_boxes[idx]}"
 
                 cv2.putText(img=frame, text=text, org=(box_x, box_y - 5),
@@ -150,14 +137,13 @@ def convert_single_video(input, output, yolo, confidence = 0.5, threshold = 0.5)
 
             # check if the video writer is None
             if video_writer is None:
-                # initialize our video writer
+                # create our video writer
                 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
                 video_writer = cv2.VideoWriter(arguments["output"], fourcc, math.floor(total / 20),
                     (frame.shape[1], frame.shape[0]), True)
             count +=1
         # write the output frame to disk
         video_writer.write(frame)
-    # release the file pointers
-    print("\t[INFO] cleaning up...")
+    print("\t cleaning up...")
     video_writer.release()
     video_stream.release()

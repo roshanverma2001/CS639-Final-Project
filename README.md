@@ -54,3 +54,37 @@ Segmentation and design functionality tests
 12/7/21
 Final Project Done, including web page
 
+## Multi Object Tracking walkthrough:
+
+Here you will find many files and directories:
+
+- accuracy
+    - Lists the results for each frame of every video with the number of bounding boxes in that specific frame and area covered
+- converted_videos_test:
+    - The test images given converted to video
+- darknet
+    - an implementaiton of YOLO built on the darknet architecture
+    - Please refer to this for information about how to download: https://pjreddie.com/darknet/yolo/
+- videos_test_labeled
+    - the videos containing our predicted labels
+    - also on google drive
+
+- Utility functions
+    - accuracy_metrics - calculate the accuracy of all videos
+- label videos:
+    - the majority of the code that runs through the video and labels each frame
+- main.py
+    - can call the functions from there
+- test accuracy
+    - calculates the accuracy of a given frame
+- yolo_video_main.py
+    - calls YOLO on a video to help with labeling
+
+
+
+# Steps 
+- download visdrone data from github
+- extract
+- download Yolov3 trained on COCO (or train on your own data)
+- call main.py
+
